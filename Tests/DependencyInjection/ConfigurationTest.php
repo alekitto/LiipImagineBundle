@@ -19,6 +19,7 @@ use Liip\ImagineBundle\DependencyInjection\Factory\Resolver\WebPathResolverFacto
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\Config\Definition\Exception\InvalidTypeException;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -111,53 +112,10 @@ class ConfigurationTest extends TestCase
         $this->assertArrayHasKey('anotherLoader', $config['loaders']);
     }
 
-    public function testSetFilesystemLoaderAsDefaultLoaderIfNotDefined(): void
-    {
-        $config = $this->processConfiguration(
-            new Configuration(
-                [
-                    new WebPathResolverFactory(),
-                ],
-                [
-                    new FileSystemLoaderFactory(),
-                ]
-            ),
-            [[
-                'loaders' => [
-                ],
-            ]]
-        );
-
-        $this->assertArrayHasKey('loaders', $config);
-        $this->assertArrayHasKey('default', $config['loaders']);
-        $this->assertArrayHasKey('filesystem', $config['loaders']['default']);
-    }
-
-    public function testSetFilesystemLoaderAsDefaultLoaderIfNull(): void
-    {
-        $config = $this->processConfiguration(
-            new Configuration(
-                [
-                    new WebPathResolverFactory(),
-                ],
-                [
-                    new FileSystemLoaderFactory(),
-                ]
-            ),
-            [[
-                'loaders' => null,
-            ]]
-        );
-
-        $this->assertArrayHasKey('loaders', $config);
-        $this->assertArrayHasKey('default', $config['loaders']);
-        $this->assertArrayHasKey('filesystem', $config['loaders']['default']);
-    }
-
     public function testThrowIfLoadersNotArray(): void
     {
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('Loaders has to be array');
+        $this->expectException(InvalidTypeException::class);
+        $this->expectExceptionMessage('Expected "array", but got "string"');
 
         $this->processConfiguration(
             new Configuration(
@@ -172,72 +130,6 @@ class ConfigurationTest extends TestCase
                 'loaders' => 'not_array',
             ]]
         );
-    }
-
-    public function testSetFilesystemLoaderAsDefaultIfLoadersSectionNotDefined(): void
-    {
-        $config = $this->processConfiguration(
-            new Configuration(
-                [
-                    new WebPathResolverFactory(),
-                ],
-                [
-                    new FileSystemLoaderFactory(),
-                ]
-            ),
-            [[]]
-        );
-
-        $this->assertArrayHasKey('loaders', $config);
-        $this->assertArrayHasKey('default', $config['loaders']);
-        $this->assertArrayHasKey('filesystem', $config['loaders']['default']);
-    }
-
-    public function testSetWebPathResolversAsDefaultIfResolversSectionNotDefined(): void
-    {
-        $config = $this->processConfiguration(
-            new Configuration(
-                [
-                    new WebPathResolverFactory(),
-                ],
-                [
-                    new FileSystemLoaderFactory(),
-                ]
-            ),
-            [[]]
-        );
-
-        $this->assertArrayHasKey('resolvers', $config);
-        $this->assertArrayHasKey('default', $config['resolvers']);
-        $this->assertArrayHasKey('web_path', $config['resolvers']['default']);
-    }
-
-    public function testShouldNotOverwriteDefaultLoaderIfDefined(): void
-    {
-        $config = $this->processConfiguration(
-            new Configuration(
-                [
-                    new WebPathResolverFactory(),
-                ],
-                [
-                    new FooLoaderFactory(),
-                    new FileSystemLoaderFactory(),
-                ]
-            ),
-            [[
-                'loaders' => [
-                    'default' => [
-                        'foo' => [
-                            'foo_option' => 'theValue',
-                        ],
-                    ],
-                ],
-            ]]
-        );
-
-        $this->assertArrayHasKey('loaders', $config);
-        $this->assertArrayHasKey('default', $config['loaders']);
-        $this->assertArrayHasKey('foo', $config['loaders']['default']);
     }
 
     public function testInjectResolverFactoryConfig(): void
@@ -302,51 +194,10 @@ class ConfigurationTest extends TestCase
         $this->assertArrayHasKey('anotherResolver', $config['resolvers']);
     }
 
-    public function testSetWebPathAsDefaultResolverIfNotDefined(): void
-    {
-        $config = $this->processConfiguration(
-            new Configuration(
-                [
-                    new WebPathResolverFactory(),
-                ], [
-                    new FileSystemLoaderFactory(),
-                ]
-            ),
-            [[
-                'resolvers' => [
-                ],
-            ]]
-        );
-
-        $this->assertArrayHasKey('resolvers', $config);
-        $this->assertArrayHasKey('default', $config['resolvers']);
-        $this->assertArrayHasKey('web_path', $config['resolvers']['default']);
-    }
-
-    public function testSetWebPathAsDefaultResolverIfNull(): void
-    {
-        $config = $this->processConfiguration(
-            new Configuration(
-                [
-                    new WebPathResolverFactory(),
-                ], [
-                    new FileSystemLoaderFactory(),
-                ]
-            ),
-            [[
-                'resolvers' => null,
-            ]]
-        );
-
-        $this->assertArrayHasKey('resolvers', $config);
-        $this->assertArrayHasKey('default', $config['resolvers']);
-        $this->assertArrayHasKey('web_path', $config['resolvers']['default']);
-    }
-
     public function testThrowsIfResolversNotArray(): void
     {
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('Resolvers has to be array');
+        $this->expectException(InvalidTypeException::class);
+        $this->expectExceptionMessage('Expected "array", but got "string"');
 
         $config = $this->processConfiguration(
             new Configuration(

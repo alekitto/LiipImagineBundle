@@ -17,6 +17,7 @@ use Liip\ImagineBundle\DependencyInjection\Factory\Resolver\ResolverFactoryInter
 use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 use Liip\ImagineBundle\Imagine\Data\DataManager;
 use Liip\ImagineBundle\Imagine\Filter\FilterManager;
+use Liip\ImagineBundle\Utility\Framework\SymfonyFramework;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\FileLocator;
@@ -67,6 +68,32 @@ class LiipImagineExtension extends Extension implements PrependExtensionInterfac
             $this->getConfiguration($configs, $container),
             $configs
         );
+
+        if (empty($config['loaders']['default'])) {
+            $config['loaders']['default'] = [
+                'filesystem' => [
+                    "locator" => "filesystem",
+                    "data_root" => [
+                        "%kernel.project_dir%/public",
+                    ],
+                    "allow_unresolvable_data_roots" => false,
+                    "bundle_resources" => [
+                        "enabled" => false,
+                        "access_control_type" => "blacklist",
+                        "access_control_list" => [],
+                    ],
+                ]
+            ];
+        }
+
+        if (empty($config['resolvers']['default'])) {
+            $config['resolvers']['default'] = [
+                'web_path' => [
+                    'web_root' => SymfonyFramework::getContainerResolvableRootWebPath(),
+                    'cache_prefix' => 'media/cache',
+                ],
+            ];
+        }
 
         if (interface_exists(MimeTypeGuesserInterface::class)) {
             $mimeTypes = new Definition(MimeTypes::class);
